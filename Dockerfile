@@ -29,6 +29,7 @@ RUN \
 FROM base AS build 
 COPY --from=download /tmp/x265/ /tmp/x265/
 WORKDIR /tmp/x265/build/linux
+ARG CXXFLAGS="-O3 -s -static-libgcc -fno-strict-overflow -fstack-protector-all -fPIC"
 # -w-macro-params-legacy to not log lots of asm warnings
 # https://bitbucket.org/multicoreware/x265_git/issues/559/warnings-when-assembling-with-nasm-215
 # TODO: remove 'sed' hack when upstream (x265) fixes the issue and adds '-DPIC' to ARM_ARGS
