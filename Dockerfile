@@ -30,6 +30,7 @@ FROM base AS build
 COPY --from=download /tmp/x265/ /tmp/x265/
 WORKDIR /tmp/x265/build/linux
 ARG CXXFLAGS="-O3 -s -static-libgcc -fno-strict-overflow -fstack-protector-all -fPIC"
+ARG TARGETARCH
 # -w-macro-params-legacy to not log lots of asm warnings
 # https://bitbucket.org/multicoreware/x265_git/issues/559/warnings-when-assembling-with-nasm-215
 # TODO: remove 'sed' hack when upstream (x265) fixes the issue and adds '-DPIC' to ARM_ARGS
@@ -38,12 +39,20 @@ ARG CXXFLAGS="-O3 -s -static-libgcc -fno-strict-overflow -fstack-protector-all -
 # https://bitbucket.org/multicoreware/x265_git/issues/620/support-passing-cmake-flags-to-multilibs
 RUN \
   apk add --no-cache --virtual build \
-    build-base cmake git numactl-dev && \
+    build-base cmake git numactl-dev nasm && \
+  case "${TARGETARCH}" in \
+    arm) \
+      export cmake_opts="-DENABLE_ASSEMBLY=OFF" \
+      ;; \
+    *) \
+      export cmake_opts="-DCMAKE_ASM_NASM_FLAGS=-w-macro-params-legacy -DENABLE_NASM=ON"\
+      ;; \
+  esac && \
   sed -i '/^cmake / s/$/ -G "Unix Makefiles" ${CMAKEFLAGS}/' ./multilib.sh && \
   sed -i 's/ -DENABLE_SHARED=OFF//g' ./multilib.sh && \
   sed -i 's/set(ARM_ARGS -fPIC -flax-vector-conversions)/set(ARM_ARGS -DPIC -fPIC -flax-vector-conversions)/' ../../source/CMakeLists.txt && \
   MAKEFLAGS="-j$(nproc)" \
-  CMAKEFLAGS="-DENABLE_SHARED=OFF -DCMAKE_VERBOSE_MAKEFILE=ON -DENABLE_AGGRESSIVE_CHECKS=ON -DCMAKE_ASM_NASM_FLAGS=-w-macro-params-legacy -DENABLE_NASM=ON -DCMAKE_BUILD_TYPE=Release" \
+  CMAKEFLAGS="-DENABLE_SHARED=OFF -DCMAKE_VERBOSE_MAKEFILE=ON -DENABLE_AGGRESSIVE_CHECKS=ON -DCMAKE_BUILD_TYPE=Release ${cmake_opts}" \
   ./multilib.sh && \
   make -C 8bit -j$(nproc) install && \
   apk del build
