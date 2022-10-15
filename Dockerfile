@@ -28,8 +28,9 @@ RUN \
 
 FROM base AS build 
 COPY --from=download /tmp/x265/ /tmp/x265/
-WORKDIR /tmp/x265/build/linux
+ARG TARGETPLATFORM
 ARG CXXFLAGS="-O3 -s -static-libgcc -fno-strict-overflow -fstack-protector-all -fPIC"
+WORKDIR /tmp/x265/build/linux
 # -w-macro-params-legacy to not log lots of asm warnings
 # https://bitbucket.org/multicoreware/x265_git/issues/559/warnings-when-assembling-with-nasm-215
 # TODO: remove 'sed' hack when upstream (x265) fixes the issue and adds '-DPIC' to ARM_ARGS
@@ -37,6 +38,17 @@ ARG CXXFLAGS="-O3 -s -static-libgcc -fno-strict-overflow -fstack-protector-all -
 # CMAKEFLAGS issue
 # https://bitbucket.org/multicoreware/x265_git/issues/620/support-passing-cmake-flags-to-multilibs
 RUN \
+  case ${TARGETPLATFORM} in \
+    linux/arm/v*) \
+      # Fake it 'til we make it
+      mkdir -p /usr/local/lib/pkgconfig/ && \
+      touch /usr/local/lib/pkgconfig/x265.pc && \
+      touch /usr/local/lib/libx265.a && \
+      mkdir -p /usr/local/include/ && \
+      touch /usr/local/include/x265.h && \
+      exit 0 \
+    ;; \
+  esac && \
   apk add --no-cache --virtual build \
     build-base cmake git numactl-dev && \
   sed -i '/^cmake / s/$/ -G "Unix Makefiles" ${CMAKEFLAGS}/' ./multilib.sh && \
