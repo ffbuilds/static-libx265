@@ -7,9 +7,10 @@ ARG X265_VERSION=0b75c44c10e605fe9e9ebed58f04a46271131827
 ARG X265_URL="https://bitbucket.org/multicoreware/x265_git/get/$X265_VERSION.tar.bz2"
 ARG X265_SHA256=8aaf96bae0025c3678c3c04cf2e645af4ae0acb5520c890b80474e96b868f545
 
-# bump: alpine /FROM alpine:([\d.]+)/ docker:alpine|^3
-# bump: alpine link "Release notes" https://alpinelinux.org/posts/Alpine-$LATEST-released.html
-FROM alpine:3.16.2 AS base
+# Must be specified
+ARG ALPINE_VERSION
+
+FROM alpine:${ALPINE_VERSION} AS base
 
 FROM base AS download
 ARG X265_URL
