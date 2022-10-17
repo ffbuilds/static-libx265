@@ -50,7 +50,7 @@ RUN \
     ;; \
   esac && \
   apk add --no-cache --virtual build \
-    build-base cmake git numactl-dev && \
+    build-base cmake git numactl-dev pkgconf && \
   sed -i '/^cmake / s/$/ -G "Unix Makefiles" ${CMAKEFLAGS}/' ./multilib.sh && \
   sed -i 's/ -DENABLE_SHARED=OFF//g' ./multilib.sh && \
   sed -i 's/set(ARM_ARGS -fPIC -flax-vector-conversions)/set(ARM_ARGS -DPIC -fPIC -flax-vector-conversions)/' ../../source/CMakeLists.txt && \
@@ -58,6 +58,11 @@ RUN \
   CMAKEFLAGS="-DENABLE_SHARED=OFF -DCMAKE_VERBOSE_MAKEFILE=ON -DENABLE_AGGRESSIVE_CHECKS=ON -DCMAKE_ASM_NASM_FLAGS=-w-macro-params-legacy -DENABLE_NASM=ON -DCMAKE_BUILD_TYPE=Release" \
   ./multilib.sh && \
   make -C 8bit -j$(nproc) install && \
+  # Sanity tests
+  pkg-config --exists --modversion --path x265 && \
+  ar -t /usr/local/lib/libx265.a && \
+  readelf -h /usr/local/lib/libx265.a && \
+  # Cleanup
   apk del build
 
 FROM scratch
