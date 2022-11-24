@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 
 # x265 release is over 1 years old and master branch has a lot of fixes and improvements, so we checkout commit so no hash is needed
 # bump: x265 /X265_VERSION=([[:xdigit:]]+)/ gitrefs:https://bitbucket.org/multicoreware/x265_git.git|re:#^refs/heads/master$#|@commit
