@@ -4,9 +4,9 @@
 # bump: x265 /X265_VERSION=([[:xdigit:]]+)/ gitrefs:https://bitbucket.org/multicoreware/x265_git.git|re:#^refs/heads/master$#|@commit
 # bump: x265 after ./hashupdate Dockerfile X265 $LATEST
 # bump: x265 link "Source diff $CURRENT..$LATEST" https://bitbucket.org/multicoreware/x265_git/branches/compare/$LATEST..$CURRENT#diff
-ARG X265_VERSION=c07d076cf20ab41d8077a804dda70fdbc3b97386
+ARG X265_VERSION=a55e7566a5bef8b4d36d8fed50d596ebcb47e34e
 ARG X265_URL="https://bitbucket.org/multicoreware/x265_git/get/$X265_VERSION.tar.bz2"
-ARG X265_SHA256=b1f0713ea35022db99b95dd9451328d7b6ed0e398e854aea3fe1fadb2cf0c568
+ARG X265_SHA256=351fa81c9eb6ee3a37131fef835e9fc170d099312d17282fa61b2ceb5571816f
 
 # Must be specified
 ARG ALPINE_VERSION
